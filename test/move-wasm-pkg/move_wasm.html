@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Move Compiler</title>
+</head>
+
+<body>
+  <h1>Move Compiler</h1>
+  <textarea id="moveCode" rows="10" cols="50" placeholder="Enter Move code here..."></textarea>
+  <br>
+  <button id="compileButton">Compile</button>
+  <pre id="output"></pre>
+
+  <script type="module">
+    import init, { compile_move } from './move_compiler_wasm.js';
+
+    let wasm;
+
+    async function initWasm () {
+      wasm = await init();
+      console.log('WASM module initialized');
+      document.getElementById('compileButton').disabled = false;
+    }
+
+    async function compileMoveCode (code) {
+      if (!wasm) {
+        throw new Error('WASM module not initialized');
+      }
+      return compile_move(code);
+    }
+
+    async function compileCode () {
+      const code = document.getElementById('moveCode').value;
+      const outputElement = document.getElementById('output');
+
+      try {
+        outputElement.textContent = 'Compiling...';
+        const result = await compileMoveCode(code);
+        outputElement.textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        outputElement.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    // Initialize WASM module
+    initWasm();
+
+    // Add event listener after the module is loaded
+    document.getElementById('compileButton').addEventListener('click', compileCode);
+    document.getElementById('compileButton').disabled = true; // Disable button until WASM is loaded
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@aptos-connect/wallet-adapter-plugin": "^1.0.0",
+    "@aptos-labs/ts-sdk": "^1.20.0",
+    "@aptos-labs/wallet-adapter-ant-design": "^2.4.11",
+    "@aptos-labs/wallet-adapter-mui-design": "^2.7.0",
+    "@aptos-labs/wallet-adapter-react": "^3.3.0",
+    "@wgb5445/hello-wasm": "^0.1.8",
+    "preact": "^10.22.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.8.2",
+    "typescript": "^5.4.5",
+    "vite": "^5.3.1",
+    "vite-plugin-wasm": "^3.3.0"
+  }
+}
