@@ -1,0 +1,15 @@
+{
+  "name": "move-compiler-wasm",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "move_compiler_wasm_bg.wasm",
+    "move_compiler_wasm.js",
+    "move_compiler_wasm.d.ts"
+  ],
+  "main": "move_compiler_wasm.js",
+  "types": "move_compiler_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
