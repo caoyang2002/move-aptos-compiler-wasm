@@ -1,0 +1,40 @@
+[workspace]
+resolver = "2"
+members = [
+    "hello-wasm", 
+    "move-compiler"
+]
+
+[workspace.package]
+authors = ["WGB5445 <wgb98512@gmail.com>"]
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+repository = ""
+rust-version = "1.75.0"
+
+[workspace.dependencies]
+wasm-bindgen = "0.2"
+anyhow = "1.0.71"
+clap = { version = "4.3.9", features = ["derive", "env", "unstable-styles"] }
+codespan-reporting = "0.11.1"
+hex = { version = "0.4.3", features = ["serde"] }
+once_cell = "1.10.0"
+petgraph = "0.5.1"
+regex = "1.9.3"
+sha3 = "0.9.1"
+tempfile = "3.3.0"
+bcs = { git = "https://github.com/aptos-labs/bcs.git", rev = "d31fab9d81748e2594be5cd5cdf845786a30562d" }
+datatest-stable = "0.1.1"
+move-stdlib = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+getrandom ={ version = "0.2", features = ["js"]}
+move-command-line-common = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-symbol-pool = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-core-types = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+aptos-types = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+serde-wasm-bindgen = "0.4"
+serde = { version = "1.0.193", features = ["derive", "rc"] }
+serde_bytes = "0.11.6"
+
+[patch.crates-io]
+x25519-dalek = { git = "https://github.com/aptos-labs/x25519-dalek", branch = "zeroize_v1" }

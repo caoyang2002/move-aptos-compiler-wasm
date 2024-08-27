@@ -9,7 +9,8 @@ crate-type = ["cdylib"]
 [dependencies]
 getrandom = { version = "0.2", features = ["js"] }
 wasm-bindgen = "0.2"
-move-compiler = { path = "../aptos-core/third_party/move/move-compiler" }
+# move-compiler = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "main" }
+move-compiler = { path = "../../aptos-core/third_party/move/move-compiler" }
 # 添加其他必要的依赖
 
 [profile.release]
