@@ -1,0 +1,8 @@
+target
+build
+pkg
+# 忽略所有 .wasm 文件
+*.wasm
+
+# 不忽略 README.md 文件
+!README.md
