@@ -1,6 +1,38 @@
 # move-aptos-compiler-wasm
 
+
+
+# 如何编译 wasm
+
+
+
+
+```bash
+
+
+```
+
+
+
+## run
+
+```bash
+npx http-server
+```
+
+
+
+
+
+
+
+
+
 move compiler on Aptos (wasm version)
+
+
+
+
 
 # Start
 
@@ -43,7 +75,7 @@ move compiler on Aptos (wasm version)
        = help: consider adding `serde1` as a feature in `Cargo.toml`
        = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
        = note: `#[warn(unexpected_cfgs)]` on by default
-
+   
    warning: `move-core-types` (lib) generated 1 warning
    warning: unexpected `cfg` condition value: `evm-backend`
        --> /home/caoyang/wasm/aptos_move_wasm/aptos-core/third_party/move/move-compiler/src/to_bytecode/translate.rs:1141:36
@@ -55,7 +87,7 @@ move compiler on Aptos (wasm version)
         = help: consider adding `evm-backend` as a feature in `Cargo.toml`
         = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
         = note: `#[warn(unexpected_cfgs)]` on by default
-
+   
    warning: field `env` is never read
      --> /home/caoyang/wasm/aptos_move_wasm/aptos-core/third_party/move/move-compiler/src/to_bytecode/context.rs:32:9
       |
@@ -65,7 +97,7 @@ move compiler on Aptos (wasm version)
       |         ^^^
       |
       = note: `#[warn(dead_code)]` on by default
-
+   
    warning: field `inline` is never read
      --> /home/caoyang/wasm/aptos_move_wasm/aptos-core/third_party/move/move-compiler/src/typing/core.rs:45:9
       |
@@ -74,7 +106,7 @@ move compiler on Aptos (wasm version)
    ...
    45 |     pub inline: bool,
       |         ^^^^^^
-
+   
    warning: `move-compiler` (lib) generated 3 warnings
       Compiling move-compiler-wasm v0.1.0 (/home/caoyang/wasm/aptos_move_wasm/move-compiler-wasm)
    warning: unused import: `move_compiler::*`
@@ -84,7 +116,7 @@ move compiler on Aptos (wasm version)
      |     ^^^^^^^^^^^^^^^^
      |
      = note: `#[warn(unused_imports)]` on by default
-
+   
    warning: unused variable: `source`
     --> src/lib.rs:5:21
      |
@@ -92,7 +124,7 @@ move compiler on Aptos (wasm version)
      |                     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_source`
      |
      = note: `#[warn(unused_variables)]` on by default
-
+   
    warning: `move-compiler-wasm` (lib) generated 2 warnings (run `cargo fix --lib -p move-compiler-wasm` to apply 1 suggestion)
        Finished `release` profile [optimized] target(s) in 1.69s
    [INFO]: ⬇️  Installing wasm-bindgen...
@@ -100,10 +132,10 @@ move compiler on Aptos (wasm version)
    [INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended
    [INFO]: ✨   Done in 6m 59s
    [INFO]: 📦   Your wasm pkg is ready to publish at /home/caoyang/wasm/aptos_move_wasm/move-compiler-wasm/pkg.
-
+   
    $ ls
    Cargo.lock  Cargo.toml  pkg  src  target
-
+   
    $ cd pkg/ && ls
    move_compiler_wasm.d.ts  move_compiler_wasm.js  move_compiler_wasm_bg.wasm  move_compiler_wasm_bg.wasm.d.ts  package.json
    ```
