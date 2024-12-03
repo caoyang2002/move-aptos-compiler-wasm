@@ -1,6 +1,6 @@
-[一个简单的 Wasm 项目](./first-wasm/)
+[一个简单的 Wasm 项目](./simple-wasm/)
 
-[一个简单的 Move Wasm 项目](./2-wasm/)
+[一个测试的 Move Wasm 项目](./test-wasm/)
 
 
 如何将 Move 语言编译器打包成 WebAssembly (WASM) 供前端使用

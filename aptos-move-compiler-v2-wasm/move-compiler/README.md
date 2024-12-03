@@ -1,8 +1,182 @@
----
-id: move-compiler
-title: Move Source Language
-custom_edit_url: https://github.com/move-language/move/edit/main/language/move-compiler/README.md
----
+# Move 源语言
+
+## 概要
+
+Move 源语言是一种符合人体工程学的语言，用于编写编译成 Move 字节码的模块和脚本。
+
+## 概览
+
+Move 源语言是一种基于表达式的语言，旨在简化编写 Move 程序——模块和脚本——而不隐藏 Move 字节码中的核心概念。
+
+目前，Move 有命令行工具。
+
+* Move Check 用于检查代码，但不生成字节码
+* Move Build 用于检查然后编译成字节码
+
+将来应该会有其他工具用于测试和实验 Move 模块。
+
+不幸的是，目前没有语言语法或特性的文档。请参阅标准库中的示例。
+
+## 设计原则
+
+### 使命
+
+提供一种极简主义、表达性强、安全且透明的语言，用于生成并与 Move 字节码链接。
+
+### 核心原则
+
+* **比字节码更简洁** Move 基于表达式，这使得编写简洁且结构化的程序成为可能，无需额外的局部变量或结构。Move 字节码是基于栈的（加上局部变量），因此没有栈访问权限的语言需要比字节码更冗长。在 Move 源语言中，表达式允许以受控和安全的方式直接在栈上编程，因此，该语言提供了与字节码相同的功能级别，但在更简洁和易读的环境中。
+
+* **Move 字节码透明度** Move 源语言试图将 Move 字节码中的概念提升到源语言中；它不是试图隐藏它们。字节码已经有一些强烈的观点（比你在字节码语言中可能预期的要强得多），源语言试图保持这种编程模型和思维方式。这一原则的意图是消除直接编写字节码的需要。此外，这意味着与发布模块中声明的函数和类型完全互操作。
+
+* **比字节码更严格** 源语言通常增加了额外的限制。在表达式级别，这意味着不允许任意操作栈（只能通过表达式进行），并且没有死代码或未使用的效果。在模块级别，这可能意味着对未使用的类型或不可调用的函数发出额外警告。在概念/程序级别，这也意味着添加集成形式验证。
+
+### 次要原则
+
+* **学习路径** 语法选择和错误消息旨在提供自然的学习方法。例如，围绕表达式语法的一些选择可以更改为更熟悉各种其他语言，但它们会损害基于表达式的语法的即插即用感觉，这可能会损害对 Move 源语言的深入理解。
+
+* **辅助常见社区模式** 随着 Move 的使用越来越多，模块的常见模式可能会出现。Move 可能会添加新的语言特性，使这些模式更容易、更清晰或更安全。但是，如果违反了语言的其他关键设计目标/原则，则不会添加。
+
+* **语义保持优化** 优化是开发者的重要工具，因为它们允许程序员以更自然的方式编写代码。然而，执行的所有优化必须是语义保持的，以防止在优化后的代码中发生灾难性的漏洞或错误。话虽如此，Move 源语言的主要目标不是产生*大量*优化的代码，但这是一个不错的特性。
+
+### 非原则
+
+* **重抽象** Move 源语言不打算隐藏 Move 字节码的细节，从引用到全局存储。可能会有一些抽象，使与这些项的交互更容易，但它们应该始终在 Move 的最基本（字节码等价）级别上可用。这并不意味着源语言目前提供的便利性，如易于字段访问或隐式冻结，违背了核心原则集，但便利性不应在字节码级别上的交互方式上含糊或不透明。注意，这并不妨碍向语言添加功能，如访问修饰符，这些修饰符翻译为编译器生成的动态检查。只是这不是语言积极添加重抽象的目标，仅仅为了掩盖字节码设计选择。
+
+## 命令行选项
+
+两个可用的程序是 Move check 和 Move build。
+
+* 可以使用 `cargo build -p move-compiler` 构建它们
+* 或直接运行
+  * `cargo run -p move-compiler --bin move-check -- [ARGS]`
+  * `cargo run -p move-compiler --bin move-build -- [ARGS]`
+
+Move check 是一个命令行工具，用于检查 Move 程序而不生成字节码
+
+```text
+move-check 0.0.1
+检查 Move 源代码，不编译成字节码。
+
+USAGE:
+    move-check [OPTIONS] [--] [PATH_TO_SOURCE_FILE]...
+
+FLAGS:
+    -h, --help       打印帮助信息
+    -V, --version    打印版本信息
+
+OPTIONS:
+    -s, --sender <ADDRESS>                           模块和脚本的发送者地址
+    -d, --dependency <PATH_TO_DEPENDENCY_FILE>...    所需的库文件作为依赖项
+
+ARGS:
+    <PATH_TO_SOURCE_FILE>...    要检查的源文件
+```
+
+Move build 是一个命令行工具，用于检查 Move 程序并生成序列化字节码。
+不会编译依赖项。
+
+```text
+move-build 0.0.1
+将 Move 源代码编译成 Move 字节码。
+
+USAGE:
+    move-build [FLAGS] [OPTIONS] [--] [PATH_TO_SOURCE_FILE]...
+
+FLAGS:
+    -m, --source-map    将字节码源映射保存到磁盘
+    -h, --help          打印帮助信息
+    -V, --version       打印版本信息
+
+OPTIONS:
+    -s, --sender <ADDRESS>                           模块和脚本的发送者地址
+    -d, --dependency <PATH_TO_DEPENDENCY_FILE>...    所需的库文件作为依赖项
+    -o, --out-dir <PATH_TO_OUTPUT_DIRECTORY>         Move 字节码输出目录 [default: build]
+
+ARGS:
+    <PATH_TO_SOURCE_FILE>...    要检查和编译的源文件
+```
+
+## 文件夹结构
+
+```text
+move-compiler                                 # 主 crate
+├── src                                       # Move 语言的源代码
+│   ├── lib.rs                                # 编译的入口点
+|   |
+│   ├── parser                                # 将源输入解析为 AST
+│   │   ├── ast.rs                            # 解析的目标 AST
+│   │   ├── mod.rs                            # 解析步骤的模块
+│   │   ├── lexer.rs                          # 词法分析器
+│   │   └── syntax.rs                         # 解析器
+|   |
+│   ├── expansion                             # 展开模块别名。修复语法中无法完全用语法表达的语法（例如赋值和打包）
+│   │   ├── ast.rs                            # 展开的目标 AST
+│   │   ├── mod.rs                            # 展开步骤的模块
+│   │   └── translate.rs                      # 解析器 ~> 展开
+|   |
+│   ├── naming                                # 解析名称。包括当前模块中的名称、泛型、局部变量和内置类型/函数
+│   │   ├── ast.rs                            # 命名的目标 AST
+│   │   ├── mod.rs                            # 命名步骤的模块
+│   │   └── translate.rs                      # 展开 ~> 命名
+|   |
+│   ├── typing                                # 对程序进行类型检查。检查是双向的，即在检查类型的同时推断类型
+│   |   ├── ast.rs                            # 类型检查的目标 AST
+│   |   ├── mod.rs                            # 类型检查步骤的模块
+│   |   ├── translate.rs                      # 命名 ~> 类型检查
+│   |   ├── core.rs                           # 核心类型系统代码。包括类型上下文和类型的规则
+│   |   ├── expand.rs                         # 类型推断后，展开所有类型变量的推断值
+│   |   └── globals.rs                        # 展开类型变量后，检查资源的正确访问（检查获取）
+|   |
+│   ├── hlir                                  # 高级 IR。将 AST 转换为基于语句的表示，而不是基于表达式的
+│   │   ├── ast.rs                            # 语句化的目标 AST
+│   │   ├── mod.rs                            # 高级 IR 步骤的模块
+│   │   └── translate.rs                      # 类型检查 ~> 高级 IR
+|   |
+│   ├── cfgir                                 # 控制流图 IR。它移除了结构化的控制流，并将块放入 CFG 中。然后执行控制流敏感的检查
+│   │   ├── ast.rs                            # CFG-化的目标 AST
+│   │   ├── mod.rs                            # CFG IR 步骤的模块
+│   │   ├── translate.rs                      # 高级 IR ~> CFG IR
+│   │   ├── absint.rs                         # 控制流敏感检查的抽象解释库
+│   │   ├── cfg.rs                            # 定义 CFG 本身（AST 只是标记块）
+│   │   ├── locals                            # 检查正确的局部变量使用（无移动后的使用，局部变量中不留资源）
+│   │       ├── mod.rs                        # 检查的模块。包括传输函数
+│   │       └── state.rs                      # 抽象解释使用的状态
+│   │   └── borrows                           # 借用检查器。检查引用安全性属性
+│   │       ├── borrow_map.rs                 # 借用图用于抽象状态。维护内部关系，
+关于引用从哪里借用
+│   │       ├── mod.rs                        # 检查的模块。包括传输函数
+│   │       └── state.rs                      # 抽象解释使用的状态
+|   |
+│   ├── to_bytecode                           # 编译成 Move 字节码。move-check 不使用
+│   │   ├── mod.rs                            # 编译成字节码的模块
+│   │   ├── translate.rs                      # CFG IR ~> Move 字节码
+│   │   ├── context.rs                        # 上下文映射 IR 构造和字节码句柄/偏移量
+│   │   ├── remove_fallthrough_jumps.rs       # CFG IR 块始终以跳转结束；Move 字节码块可以掉入。这优化了掉入的使用（移除不必要的跳转）
+│   │   └── labels_to_offsets.rs              # 在字节码生成期间，使用 CFG IR 标签。这将标签切换为字节码偏移量
+|   |
+│   ├── shared                                # 共享实用程序
+│   │   ├── mod.rs                            # 所有模块使用的共享实用程序代码（例如源位置代码）
+│   │   └── unique_map.rs                     # 包装 BTreeMap，对重复值产生错误
+|   |
+│   ├── errors                                # 各种检查产生的错误
+│   │   └── mod.rs                            # 错误模块
+|   |
+│   ├── command_line                          # 两个命令行二进制文件使用的实用程序
+│   |   └── mod.rs                            # 命令行模块
+|   |
+│   └── bin                                   # 命令行二进制文件
+│       ├── move-check.rs                     # 定义 move-check 命令行工具
+│       └── move-build.rs                     # 定义 move-build 命令行工具
+|
+└── stdlib                                    # Move 标准库
+    ├── modules                               # 核心模块
+    └── transaction_scripts                   # 核心交易脚本
+```
+
+
+
+# 包的基本信息
 
 ```toml
 # 包的基本信息
@@ -49,180 +223,4 @@ move-stdlib = { git = "https://github.com/aptos-labs/aptos-core", branch = "main
 [[test]]
 name = "move_check_testsuite"    # 测试套件名称
 harness = false                  # 禁用默认测试框架
-```
-
-# Move Source Language
-
-## Summary
-
-Move source language is an ergonomic language for writing Modules and Scripts that compile to Move bytecode.
-
-## Overview
-
-Move source language is an expression-based language that aims to simplify writing Move programs---modules and scripts---without hiding the core concepts in Move bytecode.
-
-Currently, there are command line tools for Move.
-
-* Move Check is used for checking code, but it does not generate bytecode
-* Move Build is used for checking and then compiling to bytecode
-
-In the future there should be other utilities for testing and play grounding the Move modules.
-
-There is unfortunately no documentation for the language syntax or features. See the stdlib for examples.
-
-## Design Principles
-
-### Mission
-
-Deliver a minimalistic, expressive, safe, and transparent language to produce--and link with--Move bytecode.
-
-### Primary Principles
-
-* **More Concise than Bytecode** Move is expression based, which lends itself to concise and composed programs without the need for extra locals or structure. The Move bytecode is stack based (with the addition of local variables), so a language without stack access would need to be more verbose than the bytecode. In the Move source language, expressions allow for programming directly on the stack in a controlled and safe mode, and in that way, the language gives the same level of functionality as the bytecode but in a more concise and readable environment.
-
-* **Move Bytecode Transparency** The Move source language tries to lift up concepts in the Move bytecode into a source language; it is not trying to hide them. The bytecode already has some strong opinions (much stronger than you might expect to find in a bytecode language), and the source language is trying to keep that programming model and line of thinking. The intention of this principle is to remove the need to write bytecode directly. Additionally, this means full interoperability with functions and types declared in published modules.
-
-* **Stricter than Bytecode** The source language often adds additional levels of restrictions. At an expression level, this means no arbitrary manipulation of the stack (only can do so through expressions), and no dead code or unused effects. At a module level, this could mean additional warnings for unused types or un-invocable functions. At a conceptual/program level, this will also mean adding integration for formal verification.
-
-### Secondary Principles
-
-* **Pathway of Learning** Syntax choices and error messages are intended to give a natural flow of learning. For example, some of the choices around expression syntax could be changed to be more familiar to various other languages, but they would hurt the plug-n-play feeling of the expression based syntax, which might hurt developing a deeper understanding of the Move source language.
-
-* **Aiding Common Community Patterns** As Move becomes more heavily used, common patterns for modules are likely to appear. Move might add new language features to make these patterns easier, clearer, or safer. But, they will not be added if it violates some other key design goal/principle of the language.
-
-* **Semantic Preserving Optimizations** Optimizations are an important developer tool, as they let a programmer write code in a more natural way. However, all of the optimizations performed must be semantic preserving, to prevent any catastrophic exploits or errors from occurring in optimized code. That being said, it is not the primary goal of the Move source language to produce *heavily* optimized code, but it is a nice feature to have.
-
-### Non-Principles
-
-* **Heavy Abstractions** The Move source language does not intend to hide the details of the Move bytecode, this ranges from everything of references to global storage. There might be some abstractions that make interacting with these items easier, but they should always be available in Move at their most basic (bytecode equivalent) level. This does not mean that conveniences currently given by the source language, such as easy field access or implicit freezing, are against the core set of principles, but only that conveniences should not be ambiguous or opaque in how they interact at the bytecode level. Note though, this does not preclude the addition of features to the lanugage, such as access modifiers that translate to compiler-generated dynamic checks. It is just that it is not an active goal of the language to add on heavy abstractions just for the sake of obscuring bytecode design choices.
-
-## Command-line options
-
-The two available programs are Move check and Move build.
-
-* They can be built using `cargo build -p move-compiler`
-* Or run directly with
-  * `cargo run -p move-compiler --bin move-check -- [ARGS]`
-  * `cargo run -p move-compiler --bin move-build -- [ARGS]`
-
-
-Move check is a command line tool for checking Move programs without producing bytecode
-
-```text
-move-check 0.0.1
-Check Move source code, without compiling to bytecode.
-
-USAGE:
-    move-check [OPTIONS] [--] [PATH_TO_SOURCE_FILE]...
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
-OPTIONS:
-    -s, --sender <ADDRESS>                           The sender address for modules and scripts
-    -d, --dependency <PATH_TO_DEPENDENCY_FILE>...    The library files needed as dependencies
-
-ARGS:
-    <PATH_TO_SOURCE_FILE>...    The source files to check
-```
-
-Move build is a command line tool for checking Move programs and producing serialized bytecode.
-Dependencies will not be compiled.
-
-```text
-move-build 0.0.1
-Compile Move source to Move bytecode.
-
-USAGE:
-    move-build [FLAGS] [OPTIONS] [--] [PATH_TO_SOURCE_FILE]...
-
-FLAGS:
-    -m, --source-map    Save bytecode source map to disk
-    -h, --help          Prints help information
-    -V, --version       Prints version information
-
-OPTIONS:
-    -s, --sender <ADDRESS>                           The sender address for modules and scripts
-    -d, --dependency <PATH_TO_DEPENDENCY_FILE>...    The library files needed as dependencies
-    -o, --out-dir <PATH_TO_OUTPUT_DIRECTORY>         The Move bytecode output directory [default: build]
-
-ARGS:
-    <PATH_TO_SOURCE_FILE>...    The source files to check and compile
-```
-
-## Folder Structure
-
-```text
-move-compiler                                 # Main crate
-├── src                                       # Source code for Move lang
-│   ├── lib.rs                                # The entry points into compilation
-|   |
-│   ├── parser                                # Parsing the source input into an AST
-│   │   ├── ast.rs                            # The target AST for Parsing
-│   │   ├── mod.rs                            # Module for Parsing step
-│   │   ├── lexer.rs                          # The lexer
-│   │   └── syntax.rs                         # The parser
-|   |
-│   ├── expansion                             # Expands module aliases. Fixes syntax that could not be fully expressed in the grammar (such as assignments and pack)
-│   │   ├── ast.rs                            # The target AST for Expansion
-│   │   ├── mod.rs                            # Module for Expansion step
-│   │   └── translate.rs                      # Parser ~> Expansion
-|   |
-│   ├── naming                                # Resolves names. This includes names in the current module, generics, locals, and builtin types/functions
-│   │   ├── ast.rs                            # The target AST for Naming
-│   │   ├── mod.rs                            # Module for Naming step
-│   │   └── translate.rs                      # Expansion ~> Naming
-|   |
-│   ├── typing                                # Type checks the program. The checking is bidirectional in that it infers types while also checking them
-│   |   ├── ast.rs                            # The target AST for Typing
-│   |   ├── mod.rs                            # Module for Typing step
-│   |   ├── translate.rs                      # Naming ~> Typing
-│   |   ├── core.rs                           # Core type system code. This includes the typing context and rules for types
-│   |   ├── expand.rs                         # After type inference, this expands all of the type variables with the inferred values
-│   |   └── globals.rs                        # After expanding type variables, this checks proper access for resources (checks acquires)
-|   |
-│   ├── hlir                                  # The High Level IR. It changes the AST into a statement based representation as opposed to expression based
-│   │   ├── ast.rs                            # The target AST for statement-ification
-│   │   ├── mod.rs                            # Module for High Level IR step
-│   │   └── translate.rs                      # Typing ~> High Level IR
-|   |
-│   ├── cfgir                                 # The Control Flow Graph IR. It removes the structured control flow and puts the blocks into a CFG. There are then control flow sensitive checks performed
-│   │   ├── ast.rs                            # The target AST for the CFG-ification
-│   │   ├── mod.rs                            # Module for CFG IR step
-│   │   ├── translate.rs                      # High Level IR ~> CFG IR
-│   │   ├── absint.rs                         # Abstract Interpretation library for control flow sensitive checks
-│   │   ├── cfg.rs                            # Defines the CFG itself (where the AST just labels the blocks)
-│   │   ├── locals                            # Checks proper local usage (no use after move, no resources left in locals)
-│   │   │   ├── mod.rs                        # The module for the check. Includes the transfer functions
-│   │   │   └── state.rs                      # The state used for abstract interpretation
-│   │   └── borrows                           # The Borrow Checker. Checks the reference safety properties
-│   │       ├── borrow_map.rs                 # The borrow graph used by the abstract state. Maintains internal relationships about what references are borrowing from where
-│   │       ├── mod.rs                        # The module for the check. Includes the transfer functions
-│   │       └── state.rs                      # The state used for abstract interpretation
-|   |
-│   ├── to_bytecode                           # Compilation to Move bytecode. Is not used by move-check
-│   │   ├── mod.rs                            # Module for the compilation to bytecode
-│   │   ├── translate.rs                      # CFG IR ~> Move bytecode
-│   │   ├── context.rs                        # The context maps between IR construct and bytecode handles/offsets
-│   │   ├── remove_fallthrough_jumps.rs       # The CFG IR blocks always end in a jump; Move bytecode blocks can fall through. This optimizes the usage of fallthroughs (removing unncessary jumps)
-│   │   └── labels_to_offsets.rs              # During bytecode generation, the CFG IR labels are used. This switches the labels to bytecode offsets
-|   |
-│   ├── shared                                # Shared Utilities
-│   │   ├── mod.rs                            # Shared utility code used by all modules (such as source location code)
-│   │   └── unique_map.rs                     # A wrapper around BTreeMap that produces errors on duplicate values
-|   |
-│   ├── errors                                # Errors produced by the various checks
-│   │   └── mod.rs                            # Module for Errors
-|   |
-│   ├── command_line                          # Utilities used by both command line binnaries
-│   |   └── mod.rs                            # Module for Command LIne
-|   |
-│   └── bin                                   # Command line binaries
-│       ├── move-check.rs                     # Defines the move-check command line tool
-│       └── move-build.rs                     # Defines the move-build command line tool
-|
-└── stdlib                                    # Move standard library
-    ├── modules                               # Core modules
-    └── transaction_scripts                   # Core transaction scripts
 ```

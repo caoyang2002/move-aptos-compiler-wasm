@@ -20,17 +20,17 @@ tempfile = { workspace = true }
 
 bcs = { workspace = true }
 
-move-binary-format = { workspace = true  }
+move-binary-format = { workspace = true }
 
 
-move-borrow-graph = { git = "https://github.com/aptos-labs/aptos-core", branch = "main"  }
-move-bytecode-source-map = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main"  }
-move-bytecode-verifier = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main"  }
-move-command-line-common = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
-move-core-types = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main"  }
-move-ir-to-bytecode = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main"  }
-move-ir-types = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main"  }
-move-symbol-pool = {  git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-borrow-graph = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-bytecode-source-map = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-bytecode-verifier = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-command-line-common = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-core-types = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-ir-to-bytecode = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-ir-types = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
+move-symbol-pool = { git = "https://github.com/aptos-labs/aptos-core", branch = "main" }
 
 [dev-dependencies]
 datatest-stable = { workspace = true }

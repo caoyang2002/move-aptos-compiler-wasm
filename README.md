@@ -2,17 +2,14 @@
 
 
 
-# 如何编译 wasm
-
-
-
+# How compile rust file to  wasm
 
 ```bash
-
-
+# in hello-wasm
+cargo install wasm-pack
+# in root
+cargo build --target wasm32-unknown-unknown --release
 ```
-
-
 
 ## run
 
@@ -20,19 +17,7 @@
 npx http-server
 ```
 
-
-
-
-
-
-
-
-
 move compiler on Aptos (wasm version)
-
-
-
-
 
 # Start
 
@@ -140,4 +125,4 @@ move compiler on Aptos (wasm version)
    move_compiler_wasm.d.ts  move_compiler_wasm.js  move_compiler_wasm_bg.wasm  move_compiler_wasm_bg.wasm.d.ts  package.json
    ```
 
-# Use
+

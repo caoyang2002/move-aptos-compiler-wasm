@@ -6,3 +6,5 @@ pkg
 
 # 不忽略 README.md 文件
 !README.md
+
+.aptoss

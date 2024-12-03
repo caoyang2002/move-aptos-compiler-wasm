@@ -305,6 +305,7 @@ pub fn check_build_module(_module: JsValue) -> JsValue {
     let str = compiler.check_build().unwrap();
     serde_wasm_bindgen::to_value(&CheckBuildResponse{response: str.into()}).unwrap()
 }
+
 #[wasm_bindgen]
 pub fn build_module(_module: JsValue) -> JsValue {
     let module: Module = serde_wasm_bindgen::from_value(_module).unwrap();
