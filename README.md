@@ -2,7 +2,7 @@
 
 
 
-# How compile rust file to  wasm
+# How compile Move compiler with rust to  wasm
 
 ```bash
 # in hello-wasm

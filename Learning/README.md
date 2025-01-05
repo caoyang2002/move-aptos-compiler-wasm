@@ -2,7 +2,6 @@
 
 [一个测试的 Move Wasm 项目](./test-wasm/)
 
-
 如何将 Move 语言编译器打包成 WebAssembly (WASM) 供前端使用
 
 ```rust
@@ -74,6 +73,7 @@ getrandom = { workspace = true }
 接下来是构建和使用步骤：
 
 1. 首先确保安装了必要的工具：
+
 ```bash
 # 安装 wasm-pack
 cargo install wasm-pack
