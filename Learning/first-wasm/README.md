@@ -1,0 +1,159 @@
+```bash
+wasm-pack build --target web # 编译出完整的 wasm 包装和代码
+cargo build --target wasm32-unknown-unknown # 编译出单 wasm
+```
+
+这两个命令虽然都是用来构建 WebAssembly，但有几个重要的区别：
+
+`wasm-pack build --target web`:
+1. 生成完整的 JavaScript 绑定和包装代码，使 WASM 模块更容易在 web 环境中使用
+2. 自动生成 TypeScript 类型定义文件 (.d.ts)
+3. 创建一个 npm 包结构，包含:
+   - package.json
+   - JavaScript 胶水代码
+   - .wasm 文件
+   - TypeScript 定义
+4. 使用 wasm-bindgen 处理导出的函数，使其更容易与 JavaScript 交互
+
+`cargo build --target wasm32-unknown-unknown`:
+1. 只生成原始的 .wasm 文件，没有任何 JavaScript 绑定
+2. 不生成任何额外的包装代码或类型定义
+3. 输出是一个裸的 WebAssembly 模块
+4. 需要手动编写 JavaScript 代码来加载和使用这个 WASM 模块
+5. 更适合底层或自定义的 WASM 使用场景
+
+使用建议：
+- 如果你在开发面向 Web 的项目，建议使用 `wasm-pack build --target web`，因为它提供了更完整的工具链支持
+- 如果你需要更底层的控制，或者在非 Web 环境中使用 WASM，可以使用 `cargo build --target wasm32-unknown-unknown`
+
+
+如何将 Move 语言编译器打包成 WebAssembly (WASM) 供前端使用
+
+```rust
+// hello-wasm/src/lib.rs
+use wasm_bindgen::prelude::*;
+use move_compiler::shared::NumericalAddress;
+use move_compiler::Flags;
+use std::collections::BTreeMap;
+
+#[wasm_bindgen]
+pub struct CompilerConfig {
+    named_address_mapping: BTreeMap<String, NumericalAddress>,
+}
+
+#[wasm_bindgen]
+impl CompilerConfig {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        CompilerConfig {
+            named_address_mapping: BTreeMap::new(),
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn add_address_mapping(&mut self, name: String, addr: String) {
+        if let Ok(addr) = NumericalAddress::parse_str(&addr) {
+            self.named_address_mapping.insert(name, addr);
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn compile_move(source: &str, config: &CompilerConfig) -> Result<String, JsValue> {
+    let files = vec![("source.move", source)];
+
+    let flags = Flags::empty().set_sources_shadow_deps(true);
+
+    match move_compiler::construct_pre_compiled_lib(
+        files,
+        None,
+        config.named_address_mapping.clone(),
+        flags,
+        None,
+    ) {
+        Ok(compiled) => Ok(format!("{:?}", compiled)),
+        Err(err) => Err(JsValue::from_str(&format!("Compilation error: {:?}", err))),
+    }
+}
+
+```
+
+```toml
+# hello-wasm/Cargo.toml
+[package]
+name = "hello-wasm"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = { workspace = true }
+move-compiler = { path = "../move-compiler" }
+getrandom = { workspace = true }
+
+```
+
+接下来是构建和使用步骤：
+
+1. 首先确保安装了必要的工具：
+
+```bash
+# 安装 wasm-pack
+cargo install wasm-pack
+
+# 构建 wasm 包
+cd hello-wasm
+wasm-pack build --target web
+```
+
+2. 在前端项目中使用：
+
+```javascript
+// index.js
+import init, { CompilerConfig, compile_move } from './pkg/hello_wasm.js';
+
+async function compileMoveCode() {
+    await init();
+
+    const config = new CompilerConfig();
+    config.add_address_mapping("std", "0x1");
+
+    const moveCode = `
+    module 0x1::example {
+        public fun hello(): u64 { 42 }
+    }
+    `;
+
+    try {
+        const result = compile_move(moveCode, config);
+        console.log("Compilation result:", result);
+    } catch (error) {
+        console.error("Compilation failed:", error);
+    }
+}
+
+compileMoveCode();
+
+```
+
+主要步骤说明：
+
+1. 项目结构：
+   - 创建一个 workspace 包含两个项目：move-compiler 和 hello-wasm
+   - hello-wasm 项目使用 wasm-bindgen 将 Move 编译器功能暴露给 JavaScript
+
+2. 关键点：
+   - 使用 `wasm-bindgen` 标注需要暴露给 JavaScript 的函数和类型
+   - 将 crate-type 设置为 "cdylib" 以生成 WebAssembly 模块
+   - 处理好内存管理和错误处理
+
+3. 注意事项：
+   - 需要确保所有依赖都支持 wasm32-unknown-unknown 目标
+   - 某些系统级 API 在 WASM 环境中可能不可用，需要适当处理
+   - 考虑使用 web-sys 和 js-sys 处理浏览器环境特定功能
+
+4. 编译和部署：
+   - 使用 wasm-pack 构建项目
+   - 在前端项目中正确导入和初始化 WASM 模块
