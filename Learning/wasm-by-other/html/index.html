@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>WASM Calculator</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 20px auto;
+                padding: 20px;
+            }
+            .calculator {
+                background: #f5f5f5;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .input-group {
+                margin-bottom: 15px;
+            }
+            input {
+                padding: 8px;
+                margin: 0 10px;
+                width: 100px;
+            }
+            button {
+                padding: 8px 15px;
+                background: #4caf50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            button:hover {
+                background: #45a049;
+            }
+            #results {
+                margin-top: 20px;
+                padding: 15px;
+                background: #fff;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="calculator">
+            <h2>WASM Calculator</h2>
+            <div class="input-group">
+                <label>数字1:</label>
+                <input type="number" id="num1" value="10" />
+                <label>数字2:</label>
+                <input type="number" id="num2" value="5" />
+            </div>
+            <div>
+                <button id="calc-button">计算</button>
+            </div>
+            <div id="results">
+                <p>加法结果: <span id="add-result">-</span></p>
+                <p>减法结果: <span id="subtract-result">-</span></p>
+                <p>乘法结果: <span id="multiply-result">-</span></p>
+                <p>除法结果: <span id="divide-result">-</span></p>
+            </div>
+        </div>
+
+        <script type="module">
+            import init, {
+                calculate_add,
+                calculate_multiply,
+                calculate_subtract,
+                calculate_divide,
+            } from "../pkg/wasm_by_other.js";
+
+            async function initWasm() {
+                try {
+                    await init();
+
+                    const calcButton = document.getElementById("calc-button");
+
+                    function calculate() {
+                        // 将输入值转换为 BigInt
+                        const num1 = BigInt(
+                            document.getElementById("num1").value,
+                        );
+                        const num2 = BigInt(
+                            document.getElementById("num2").value,
+                        );
+
+                        // 注意：BigInt 需要去掉 'n' 后缀才能显示
+                        document.getElementById("add-result").textContent =
+                            calculate_add(num1, num2).toString();
+                        document.getElementById("subtract-result").textContent =
+                            calculate_subtract(num1, num2).toString();
+                        document.getElementById("multiply-result").textContent =
+                            calculate_multiply(num1, num2).toString();
+                        try {
+                            document.getElementById(
+                                "divide-result",
+                            ).textContent = calculate_divide(
+                                num1,
+                                num2,
+                            ).toString();
+                        } catch (e) {
+                            document.getElementById(
+                                "divide-result",
+                            ).textContent = "除数不能为0";
+                        }
+                    }
+
+                    calcButton.addEventListener("click", calculate);
+                    calculate(); // 初始计算
+                } catch (error) {
+                    console.error("WASM initialization failed:", error);
+                    document.body.innerHTML += `<div style="color: red">Error: ${error.message}</div>`;
+                }
+            }
+
+            initWasm();
+        </script>
+    </body>
+</html>

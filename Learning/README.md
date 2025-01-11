@@ -1,6 +1,9 @@
-[一个简单的 Wasm 项目](./simple-wasm/)
+# first-wasm 是一个简单的 wasm 程序
 
-[一个测试的 Move Wasm 项目](./test-wasm/)
+# hello-wasm 是一个带有 log 输出的 wasm
+
+# wasm-by-other 是一个可以在前端显示的 html-wasm
+
 
 如何将 Move 语言编译器打包成 WebAssembly (WASM) 供前端使用
 
@@ -36,9 +39,9 @@ impl CompilerConfig {
 #[wasm_bindgen]
 pub fn compile_move(source: &str, config: &CompilerConfig) -> Result<String, JsValue> {
     let files = vec![("source.move", source)];
-    
+
     let flags = Flags::empty().set_sources_shadow_deps(true);
-    
+
     match move_compiler::construct_pre_compiled_lib(
         files,
         None,
@@ -91,16 +94,16 @@ import init, { CompilerConfig, compile_move } from './pkg/hello_wasm.js';
 
 async function compileMoveCode() {
     await init();
-    
+
     const config = new CompilerConfig();
     config.add_address_mapping("std", "0x1");
-    
+
     const moveCode = `
     module 0x1::example {
         public fun hello(): u64 { 42 }
     }
     `;
-    
+
     try {
         const result = compile_move(moveCode, config);
         console.log("Compilation result:", result);
