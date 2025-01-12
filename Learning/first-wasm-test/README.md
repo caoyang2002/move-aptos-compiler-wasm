@@ -79,3 +79,13 @@ cargo build --target wasm32-unknown-unknown # 编译出单 wasm
 2. 使用 `wasm-pack build` 编译项目
 3. 测试生成的 WebAssembly 模块
 4. 需要时发布到 npm
+
+# 测试
+
+运行 `wasm-pack test --chrome` 这个命令会：
+
+编译你的 Rust 代码为 WebAssembly
+在 Chrome 浏览器中运行测试
+报告测试结果
+
+如果你想在其他浏览器中测试，wasm-pack 也支持 Firefox (`--firefox`) 和无头浏览器 (`--headless`)。
