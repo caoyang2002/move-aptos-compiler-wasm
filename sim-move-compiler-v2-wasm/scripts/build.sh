@@ -1,1 +1,0 @@
-wasm-pack build -t web --release -s wgb5445 hello-wasm
